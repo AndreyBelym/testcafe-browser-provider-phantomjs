@@ -44,7 +44,7 @@ gulp.task('test', ['build'], function () {
     var testCafeCmd = path.join(__dirname, 'node_modules/.bin/testcafe');
 
     var testCafeOpts = [
-        'phantomjs',
+        'firefox,chrome',
         'test/**/*.js',
         '-s', '.screenshots'
     ];

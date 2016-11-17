@@ -1,47 +1,47 @@
-import { create as createPhantom } from 'phantom';
+/* eslint-disable no-console*/
+import browserTools from 'testcafe-browser-tools';
+import childProcess from 'child_process';
+
 
 export default {
-    phantom: null,
+    isMultiBrowser: true,
 
-    openedPages: {},
+    async openBrowser (browserId, pageUrl, browserName) {
+        var Promise = require('pinkie');
 
-    isMultiBrowser: false,
+        console.log('\n', 0, '\n');
+        var openParameters = await browserTools.getBrowserInfo(browserName);
 
-    async openBrowser (id, pageUrl) {
-        var page = await this.phantom.createPage();
+        console.log(openParameters.cmd);
 
-        await page.open(pageUrl);
+        var command = `${openParameters.path} ${openParameters.cmd} "${pageUrl}" 0<&- 1>/dev/null 2>&1 &`;
 
-        this.openedPages[id] = page;
+        await new Promise(resolve => {
+            childProcess.exec(command, resolve);
+        });
+
+        console.log(2);
     },
 
-    async closeBrowser (id) {
-        var page = this.openedPages[id];
-
-        delete this.openedPages[id];
-
-        await page.close();
+    async closeBrowser (browserId) {
+        await browserTools.close(browserId);
     },
 
-    async init () {
-        this.phantom = await createPhantom();
+    async isLocalBrowser () {
+        return true;
     },
 
-    async dispose () {
-        await this.phantom.exit();
+    async getBrowserList () {
+        var installations = await browserTools.getInstallations();
 
-        this.phantom = null;
+        return Object.keys(installations);
     },
 
-    async resizeWindow (id, width, height) {
-        var page = this.openedPages[id];
+    async isValidBrowserName (browserName) {
+        var browserNames = await this.getBrowserList();
 
-        await page.property('viewportSize', { width, height });
-    },
+        browserName = browserName.toLowerCase();
 
-    async takeScreenshot (id, screenshotPath) {
-        var page = this.openedPages[id];
-
-        await page.render(screenshotPath);
+        return browserNames.indexOf(browserName) > -1;
     }
 };

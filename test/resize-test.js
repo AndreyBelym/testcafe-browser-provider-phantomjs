@@ -1,17 +1,14 @@
-import { expect } from 'chai';
+import { Selector } from 'testcafe';
 
+fixture `My fixture`
+    .page `https://chrisbateman.github.io/guide-to-web-components/demos/shadow-dom.htm`;
 
-fixture `Resize`
-    .page('https://google.com');
+const paragraph = Selector(() => {
+    return document.querySelector('#demo1').shadowRoot.querySelectorAll('p');
+});
 
-test('Resize test', async t => {
-    await t.resizeWindow(800, 600);
+test('Get text within shadowroot', async t => {
+    await t.click(paragraph.nth(0));
 
-    var newSize = await t.eval(() => ({
-        width:  window.innerWidth,
-        height: window.innerHeight
-    }));
-
-    expect(newSize.width).to.be.equal(800);
-    expect(newSize.height).to.be.equal(600);
+    await t.expect(paragraph.nth(0).textContent).eql('These paragraphs are in a shadow root.');
 });
